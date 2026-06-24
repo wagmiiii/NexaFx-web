@@ -11,7 +11,7 @@
 |-------|--------|-------------------|-----------------|-----------------|-------|
 | `/` | Yes | N/A | Yes | None | Landing page loads correctly. |
 | `/login` | **No (404)** | N/A | N/A | N/A | **Bug:** The route is `/sign-in`. `/login` does not exist. |
-| `/sign-in` | Yes | N/A | Yes | None | Replacing `/login` |
+| `/sign-in` | Yes | N/A | Yes | None | Replacing `/login`. NOTE: The "Sign up" link points to a broken `/sign-up` route instead of `/signup`. |
 | `/signup` | Yes | N/A | Yes | None | UI loads, but API call fails (404) |
 | `/signup/verify` | Blocked | N/A | Yes | None | Cannot reach due to broken signup API |
 | `/forgot-password` | Yes | N/A | Yes | None | Accessible via `/sign-in` |
@@ -69,6 +69,7 @@
 1. **Auth Endpoints Missing (404):** Both `/signup` and login API calls are returning 404s. No user can enter the application. This must be fixed before any dashboard features can be functionally tested in the browser.
 2. **Missing Admin Routes:** The entire `/admin` flow is returning a 404 Page Not Found.
 3. **Route Naming Mismatch:** The specification called for `/login`, but the frontend is using `/sign-in`. The redirect guards correctly point to `/sign-in`.
+4. **Broken Navigation Link:** The "Don't have an account? Sign up" link on the `/sign-in` page incorrectly routes to `/sign-up` (which 404s) instead of the actual `/signup` route.
 
 **NOTABLE IMPROVEMENTS:**
 * The frontend UI code for the Dashboard (`account-overview`, `convert-form`, `transaction-table`) has been successfully migrated away from hardcoded mock data and is now wired up to API fetcher functions.
