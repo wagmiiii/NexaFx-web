@@ -55,7 +55,7 @@ export default function DashboardLayout({
       {/* Sidebar - Mobile Drawer */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-70 transform transition-transform duration-300 ease-in-out md:hidden bg-white dark:bg-black',
+          'fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out md:hidden bg-white dark:bg-black',
           isOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >

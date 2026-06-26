@@ -34,7 +34,7 @@ export default function AdminLayout({
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => setIsSidebarOpen(true)}
-                                className="lg:hidden p-2 rounded-md hover:bg-gray-100"
+                                className="lg:hidden p-2 rounded-md hover:bg-gray-100 min-h-[44px] min-w-[44px] flex items-center justify-center"
                             >
                                 <Menu size={22} />
                             </button>
@@ -44,7 +44,7 @@ export default function AdminLayout({
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors relative">
+                            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors relative min-h-[44px] min-w-[44px] flex items-center justify-center">
                                 <Bell size={20} />
                                 <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
                             </button>

@@ -77,7 +77,7 @@ export default function VerifyOtpPage() {
   const isOtpComplete = otp.every((digit) => digit !== "");
 
   return (
-    <div className="w-full max-w-lg bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-12 animate-in fade-in slide-in-from-bottom-5 duration-500">
+    <div className="w-full max-w-lg bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 sm:p-12 animate-in fade-in slide-in-from-bottom-5 duration-500">
       <div className="text-center mb-10">
         <h1 className="text-3xl font-bold text-zinc-900 mb-4 tracking-tight">
           VERIFY CODE

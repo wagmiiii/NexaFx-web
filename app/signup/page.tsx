@@ -64,7 +64,7 @@ export default function CreateAccountPage() {
   };
 
   return (
-    <div className="w-full max-w-lg bg-card text-card-foreground rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-12 animate-in fade-in zoom-in duration-500 border border-border/50">
+    <div className="w-full max-w-lg bg-card text-card-foreground rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 sm:p-12 animate-in fade-in zoom-in duration-500 border border-border/50">
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold text-foreground mb-2">
           Create an account
