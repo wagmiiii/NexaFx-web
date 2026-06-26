@@ -4,15 +4,18 @@ import { useState, useEffect } from "react";
 import { type AdminUser, getAdminUserById } from "@/lib/api/admin";
 import { getRequestErrorMessage, isOfflineError } from "@/lib/api-client";
 import { X, Eye, EyeOff, Copy, MoreVertical, Trash2 } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { AdminUser, getAdminUserById, deleteAdminUser, updateUserKyc } from '@/lib/api/admin';
+import { X, Eye, EyeOff, Copy, Trash2, Loader2, Check, Ban } from 'lucide-react';
 
 interface UserDetailPanelProps {
   user: AdminUser;
   onClose: () => void;
+  onSuccess: () => void;
 }
 
-export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
-  const [currentUser, setCurrentUser] = useState<AdminUser>(user);
-  const [detailsLoading, setDetailsLoading] = useState(false);
+export function UserDetailPanel({ user: initialUser, onClose, onSuccess }: UserDetailPanelProps) {
+  const [user, setUser] = useState<AdminUser>(initialUser);
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [offlineNotice, setOfflineNotice] = useState<string | null>(null);
@@ -46,11 +49,26 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
       }
     }
 
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdatingKyc, setIsUpdatingKyc] = useState(false);
+
+  useEffect(() => {
+    async function fetchDetails() {
+      try {
+        const detailedUser = await getAdminUserById(initialUser.id);
+        setUser(detailedUser);
+      } catch (err) {
+        console.error("Failed to load user details", err);
+        setUser(initialUser);
+      }
+    }
     fetchDetails();
-  }, [user]);
+  }, [initialUser]);
 
   const handleCopyWallet = () => {
-    navigator.clipboard.writeText(currentUser.walletAddress);
+    if (user.walletAddress) {
+      navigator.clipboard.writeText(user.walletAddress);
+    }
   };
 
   const handleDelete = () => {
@@ -61,13 +79,42 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
     console.log("User deleted:", currentUser.id);
     setShowDeleteConfirm(false);
     onClose();
+  const confirmDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await deleteAdminUser(user.id);
+      setShowDeleteConfirm(false);
+      onSuccess();
+      onClose();
+    } catch (err) {
+      console.error("Failed to delete user", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to delete user. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleKycStatusUpdate = async (status: 'Verified' | 'Unverified') => {
+    try {
+      setIsUpdatingKyc(true);
+      await updateUserKyc(user.id, status);
+      setUser(prev => ({ ...prev, kycStatus: status }));
+      onSuccess();
+    } catch (err) {
+      console.error("Failed to update KYC status", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to update KYC status. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsUpdatingKyc(false);
+    }
   };
 
   const getInitials = () => {
-    if (currentUser.firstName && currentUser.lastName) {
-      return `${currentUser.firstName[0]}${currentUser.lastName[0]}`.toUpperCase();
+    if (user.firstName && user.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
     }
-    return currentUser.email[0].toUpperCase();
+    return user.email[0].toUpperCase();
   };
 
   return (
@@ -90,6 +137,8 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
             onClick={onClose}
             className="hidden lg:block p-1 hover:bg-gray-100 rounded-full transition-colors absolute right-4"
           >
+          <h2 className="text-base font-medium text-gray-900">User Details</h2>
+          <button onClick={onClose} className="hidden lg:block p-1 hover:bg-gray-100 rounded-full transition-colors absolute right-4">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -138,6 +187,7 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
                           ? `${currentUser.firstName} , ${currentUser.lastName}`
                           : "No name"
                         : "••••••••"}
+                      {showSensitiveInfo ? (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'No name') : '••••••••'}
                     </p>
                   </div>
                   <div className="flex justify-between items-center">
@@ -153,6 +203,11 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
                         ? currentUser.phone || "No phone number"
                         : "••••••••"}
                     </p>
+                    <p className="text-sm text-gray-900 font-medium">{showSensitiveInfo ? user.email : '••••••••'}</p>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-500">Phone Number</p>
+                    <p className="text-sm text-gray-900 font-medium">{showSensitiveInfo ? (user.phone || 'No phone number') : '••••••••'}</p>
                   </div>
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-gray-500">Wallet address</p>
@@ -167,6 +222,9 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
                           onClick={handleCopyWallet}
                           className="p-1 hover:bg-gray-100 rounded transition-colors"
                         >
+                      <p className="text-sm text-gray-900 font-medium">{showSensitiveInfo ? (user.walletAddress || 'No wallet address') : '••••••••'}</p>
+                      {showSensitiveInfo && user.walletAddress && (
+                        <button onClick={handleCopyWallet} className="p-1 hover:bg-gray-100 rounded transition-colors">
                           <Copy className="w-4 h-4 text-gray-400" />
                         </button>
                       )}
@@ -177,6 +235,7 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
                     <p className="text-sm text-gray-900 font-medium">
                       {showSensitiveInfo ? currentUser.username : "••••••••"}
                     </p>
+                    <p className="text-sm text-gray-900 font-medium">{showSensitiveInfo ? user.username : '••••••••'}</p>
                   </div>
                 </div>
 
@@ -199,6 +258,15 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
                     <p className="text-xl lg:text-2xl font-semibold text-gray-900">
                       NGN{currentUser.totalWithdraw.toFixed(2)}
                     </p>
+                    <p className="text-xl lg:text-2xl font-semibold text-gray-900">{user.transactions}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Total deposit</p>
+                    <p className="text-xl lg:text-2xl font-semibold text-gray-900">NGN {user.totalDeposit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Total withdraw</p>
+                    <p className="text-xl lg:text-2xl font-semibold text-gray-900">NGN {user.totalWithdraw.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                 </div>
               </div>
@@ -215,6 +283,34 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
                   <button className="text-gray-400 hover:text-gray-600">
                     <MoreVertical className="w-5 h-5" />
                   </button>
+                <h3 className="text-xs font-medium text-gray-400 uppercase mb-3 tracking-wider">KYC Verification</h3>
+                <div className="bg-orange-50 rounded-lg px-4 py-3 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-base font-medium text-orange-700">{user.kycStatus}</span>
+                    {isUpdatingKyc && <Loader2 className="w-4 h-4 animate-spin text-orange-700" />}
+                  </div>
+                  
+                  <div className="flex gap-2 border-t border-orange-100 pt-2">
+                    {user.kycStatus !== 'Verified' ? (
+                      <button
+                        onClick={() => handleKycStatusUpdate('Verified')}
+                        disabled={isUpdatingKyc}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        Approve KYC
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleKycStatusUpdate('Unverified')}
+                        disabled={isUpdatingKyc}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                      >
+                        <Ban className="w-3.5 h-3.5" />
+                        Reject KYC
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -239,6 +335,7 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
                   <span className="text-sm font-semibold text-gray-900">
                     {currentUser.createdAt}
                   </span>
+                  <span className="text-sm font-semibold text-gray-900">{user.createdAt}</span>
                 </div>
               </div>
             </div>
@@ -282,6 +379,19 @@ export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
                 onClick={confirmDelete}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
+              <button 
+                onClick={() => setShowDeleteConfirm(false)} 
+                disabled={isDeleting}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDelete} 
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {isDeleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Confirm
               </button>
             </div>
