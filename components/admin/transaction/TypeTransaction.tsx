@@ -1,5 +1,3 @@
-import React from "react";
-
 export function TypeTransaction({ children }: { children: React.ReactNode }) {
   return (
     <button className="gradient-blue-yellow rounded-[8px] w-[93px] h-[28px] p-px">

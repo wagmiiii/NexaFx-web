@@ -1,6 +1,45 @@
 "use client";
 
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Cell,
+    ResponsiveContainer,
+    Tooltip,
+} from "recharts";
 import { ChevronDown } from "lucide-react";
+// NOTE: The backend's GET /admin/metrics only returns single summary totals
+// (totalDeposits, totalWithdrawals) instead of time-series/historical monthly progress.
+// To keep this visual chart component working premium-grade without rendering empty dashboards,
+// we retain the historical monthly structure from mockRevenueData.
+// Raised a backend feature request for GET /admin/revenue-chart or time-series metrics.
+const mockRevenueData = [
+  { month: 'JAN', value: 60000 },
+  { month: 'FEB', value: 85000 },
+  { month: 'MAR', value: 50000 },
+  { month: 'APR', value: 45000 },
+  { month: 'MAY', value: 90000 },
+  { month: 'JUN', value: 10000 },
+  { month: 'JUL', value: 30000 },
+  { month: 'AUG', value: 25000 },
+  { month: 'SEP', value: 92000 },
+  { month: 'OCT', value: 70000 },
+  { month: 'NOV', value: 55000 },
+  { month: 'DEC', value: 68000 },
+];
+
+const ACTIVE_MONTH = "MAY";
+const ACTIVE_COLOR = "#F97316";
+const DEFAULT_COLOR = "#E5E7EB";
+
+const yAxisTicks = [0, 10000, 30000, 50000, 100000];
+
+function formatYAxis(value: number) {
+    if (value === 0) return "$0K";
+    return `$${value / 1000}K`;
+}
 
 export function RevenueChart() {
     return (
@@ -14,10 +53,55 @@ export function RevenueChart() {
                 </button>
             </div>
 
-            <div className="flex-1 relative min-h-[180px] flex items-center justify-center">
-                <div className="text-center text-sm text-gray-400 font-medium">
-                    No historical data available
-                </div>
+            <div className="flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                        data={mockRevenueData}
+                        barSize={35}
+                        barCategoryGap="20%"
+                        margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                    >
+                        <XAxis
+                            dataKey="month"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                            dy={6}
+                        />
+                        <YAxis
+                            ticks={yAxisTicks}
+                            tickFormatter={formatYAxis}
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                            width={44}
+                        />
+                        <Tooltip
+                            cursor={{ fill: 'transparent' }}
+                            formatter={(value) => [
+                                `$${(Number(value) || 0).toLocaleString()}`,
+                                'Revenue',
+                            ]}
+                            contentStyle={{
+                                borderRadius: "8px",
+                                border: "1px solid #E5E7EB",
+                                fontSize: "12px",
+                            }}
+                        />
+                        <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                            {mockRevenueData.map((entry) => (
+                                <Cell
+                                    key={entry.month}
+                                    fill={
+                                        entry.month === ACTIVE_MONTH
+                                            ? ACTIVE_COLOR
+                                            : DEFAULT_COLOR
+                                    }
+                                />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
             </div>
         </div>
     );

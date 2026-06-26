@@ -229,7 +229,7 @@ export function UserDetailPanel({ user: initialUser, onClose, onSuccess }: UserD
       {showDeleteConfirm && (
         <>
           <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 z-[70] w-full max-sm mx-4">
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 z-[70] w-full max-w-sm mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete User</h3>
             <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this user? This action cannot be undone.</p>
             <div className="flex gap-3 justify-end">
