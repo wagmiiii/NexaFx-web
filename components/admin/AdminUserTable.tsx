@@ -15,7 +15,7 @@ export function AdminUserTable({ users, onUserClick }: AdminUserTableProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg overflow-x-auto w-full">
+    <div className="bg-white rounded-lg overflow-x-auto w-full max-w-[100vw]">
       <table className="w-full min-w-[800px] text-left">
         <thead>
           <tr className="border-b border-gray-200">
